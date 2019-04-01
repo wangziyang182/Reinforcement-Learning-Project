@@ -14,8 +14,8 @@ class train_ES():
                 # env = 'BipedalWalker-v2',
                 env = 'CartPole-v1',
                 gamma = 0.99,
-                sigma = 3,
-                lr = 1 * 1e-2,
+                sigma = 2,
+                lr = 3 * 1e-2,
                 max_length = 2000,
                 num_test = 1,
                 continuous_action = True
