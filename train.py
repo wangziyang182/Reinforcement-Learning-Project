@@ -84,7 +84,7 @@ class train_ES():
                 plt.pause(0.3)
 
                 #update param
-                param = param + (self.lr / self.num_perturbations / self.sigma * (noisy_param.T@pert_fittness)).flatten()
+                param = param + (self.lr / self.num_perturbations / self.sigma * (noises.T@pert_fittness)).flatten()
                 print("-" * 100)
 
             #save weights
