@@ -6,28 +6,30 @@ import collections
 
 class BlackBox:
     
-    def __init__(self,action_space,state_space,sess,continuous_action = False):
+    def __init__(self,action_space,state_space,sess,max_length,continuous_action = False):
         self.sess = sess
         self.action_space = action_space
+        self.max_length = max_length
         self.Weight = []
         self.Bias = []
         self.shape = []
-        self._init_model(action_space,state_space,continuous_action = False)
+        self.continuous_action = continuous_action
+        self._init_model(action_space,state_space)
         self.sess.run(tf.global_variables_initializer())   
         self.saver = tf.train.Saver()
  
 
     
-    def _init_model(self,action_space,state_space,continuous_action = False):
+    def _init_model(self,action_space,state_space):
         state = tf.placeholder(tf.float32,[None,state_space])
         x_w_b1 = self._add_layer(state,state_space,state_space * 2,activation = tf.nn.relu)
         x_w_b2 = self._add_layer(x_w_b1,state_space * 2,int(state_space / 2),activation = tf.nn.relu)
-        if continuous_action == False:
+        if self.continuous_action == False:
             action = self._add_layer(x_w_b2,int(state_space / 2),action_space, activation = tf.nn.softmax)
-            self.continuous = False
+            # self.continuous = False
         else:
             action = self._add_layer(x_w_b2,int(state_space / 2),action_space, activation = None)
-            self.continuous = True
+            # self.continuous = True
 
         self.state = state
         self.action = action
@@ -41,7 +43,7 @@ class BlackBox:
         self.Bias.append(b)
 
         if activation == None:
-            return x_w_b
+            return Xw_b
         else:
             return activation(Xw_b)
 
@@ -77,7 +79,7 @@ class BlackBox:
 
 
     def _take_action(self,state,greedy = True):
-        if self.continuous == True:
+        if self.continuous_action == True:
             return self.sess.run(self.action, feed_dict = {self.state: state}).flatten()
 
         else:
@@ -97,7 +99,7 @@ class BlackBox:
         state = state[np.newaxis,...]
         individual_fit = 0
 
-
+        counter = 0
         while not done:
             #render the env
             if render == True:
@@ -109,6 +111,10 @@ class BlackBox:
             state,reward,done, _ = env.step(action)
             state = state[np.newaxis,...]
             individual_fit += reward
+
+            counter +=0
+            if counter > self.max_length:
+                break
 
         env.close()
         return individual_fit
