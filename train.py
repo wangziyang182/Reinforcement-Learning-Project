@@ -4,6 +4,7 @@ import tensorflow as tf
 from BlackBoxNetWork import BlackBox
 import os
 import matplotlib.pyplot as plt
+import sys
 
 
 class train_ES():
@@ -61,7 +62,6 @@ class train_ES():
             #get param for the len
             param = np.array(bbnw.get_flat_param())
             for iteration in range(self.iterations):
-                print('iteration',iteration)
                 #gaussian Matrices
                 noises = self.sigma * np.random.randn(self.num_perturbations,len(param))
                 noisy_param = param + noises
@@ -69,7 +69,7 @@ class train_ES():
                 fittness = []
                 counter = 0
                 for ind in noisy_param:
-                    if counter % self.num_perturbations == 0 and iteration % (int(self.iterations)/2) == 0:
+                    if counter % self.num_perturbations == 0 and iteration % 2 == 0:
                         render = True
                     else:
                         render = False
@@ -81,8 +81,11 @@ class train_ES():
                 pert_fittness = np.array(fittness).reshape((len(fittness),1))
 
                 #record average reward
-                fit_list.append(np.sum(pert_fittness)/self.num_perturbations)
+                average_fit = np.sum(pert_fittness)/self.num_perturbations
+                fit_list.append(average_fit)
                 iteration_list.append(iteration)
+
+                #dynamic plot the graph
                 plt.plot(iteration_list,fit_list,'r')
                 plt.draw()
                 plt.pause(0.3)
@@ -90,6 +93,10 @@ class train_ES():
                 #update param
                 param = param + (self.lr / self.num_perturbations / self.sigma * (noises.T@pert_fittness)).flatten()
                 print("-" * 100)
+
+                #print the results
+                print('iteration : {} |  average_fit : {}'.format(iteration,average_fit))
+
 
             #save weights
             # bbnw.saver.save(bbnw.sess,)
@@ -103,7 +110,7 @@ class train_ES():
 
 
 if __name__ == '__main__':
-
+    print(sys.path[0])
     ES = train_ES(env = 'CartPole-v1',continuous_action = False)
     ES.train()
 
